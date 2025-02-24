@@ -1,0 +1,79 @@
+import getpass
+import hashlib
+
+# Simple user database (in a real system, this would be stored securely)
+users = {
+    "john_doe": {
+        "password_hash": hashlib.sha256("Pass123!".encode()).hexdigest(),
+        "full_name": "John Doe"
+    },
+    "jane_smith": {
+        "password_hash": hashlib.sha256("Secure456@".encode()).hexdigest(),
+        "full_name": "Jane Smith"
+    }
+}
+
+def hash_password(password):
+    """Convert password to SHA-256 hash"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def login():
+    """Handle user login with maximum 3 attempts"""
+    attempts = 0
+    max_attempts = 3
+    
+    print("Welcome to the System")
+    print("====================")
+    
+    while attempts < max_attempts:
+        username = input("Enter username: ").lower().strip()
+        
+        # Check if username exists
+        if username not in users:
+            print("Username not found!")
+            attempts += 1
+            remaining = max_attempts - attempts
+            print(f"Attempts remaining: {remaining}")
+            continue
+        
+        # Get password securely without showing input
+        password = getpass.getpass("Enter password: ")
+        password_hash = hash_password(password)
+        
+        # Verify credentials
+        if password_hash == users[username]["password_hash"]:
+            print(f"\nLogin successful! Welcome, {users[username]['full_name']}")
+            return True, username
+        else:
+            attempts += 1
+            remaining = max_attempts - attempts
+            print("Incorrect password!")
+            print(f"Attempts remaining: {remaining}")
+    
+    print("\nMaximum login attempts exceeded. Account locked!")
+    return False, None
+
+def main():
+    """Main system function"""
+    logged_in, username = login()
+    
+    if logged_in:
+        print("\nSystem Menu")
+        print("===========")
+        print("1. View Profile")
+        print("2. Logout")
+        
+        choice = input("\nEnter your choice (1-2): ")
+        
+        if choice == "1":
+            print(f"\nProfile: {users[username]['full_name']}")
+            print(f"Username: {username}")
+        elif choice == "2":
+            print("Logging out... Goodbye!")
+        else:
+            print("Invalid choice!")
+    else:
+        print("Please contact system administrator.")
+
+if __name__ == "__main__":
+    main()
